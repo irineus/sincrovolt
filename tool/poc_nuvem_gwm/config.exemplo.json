@@ -1,0 +1,9 @@
+{
+  "_comentario": "COPIE para %USERPROFILE%\\.sincrovolt\\gwm\\config.json (FORA do repo). Não commite valores reais.",
+  "email": "seu-email-da-conta-my-gwm",
+  "vin": "opcional; se vazio, usa o primeiro veículo da conta",
+  "signAppId": "id de assinatura do app My GWM (ver README, seção Certificado e assinatura)",
+  "signHash": "hash de assinatura do app My GWM (ver README)",
+  "countryCode": "55",
+  "pollGapSeconds": 30
+}

@@ -1,0 +1,12 @@
+# Nada de credencial, certificado ou saída real entra no repo.
+# A configuração real mora em %USERPROFILE%\.sincrovolt\gwm\ (fora do repo).
+# Estas regras são um cinto de segurança caso algo seja criado aqui dentro.
+config.json
+certs/
+saida/
+deviceid.txt
+*.cer
+*.key
+*.p12
+*.pem
+relatorio-*.md
