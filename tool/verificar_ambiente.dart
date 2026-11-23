@@ -29,6 +29,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'verificador/regras.dart';
+
 Future<void> main(List<String> args) async {
   final exigirAndroid = args.contains('--android');
   final semAndroid = args.contains('--sem-android');
@@ -66,6 +68,7 @@ Future<void> main(List<String> args) async {
 
   final esperado = _lerEsperado(raiz, r);
   final sdkFlutter = await _verificarFlutter(raiz, esperado, r);
+  _verificarLocks(raiz, sdkFlutter, r);
   if (!semAndroid) {
     await _verificarJdk(r);
     _verificarAndroidSdk(esperado, r);
@@ -258,7 +261,7 @@ Future<Directory?> _verificarFlutter(
         '`flutter --version` não respondeu no tempo limite.',
       );
     case _Estado.rodou:
-      final versaoPath = _versaoDe(noPath.saida);
+      final versaoPath = versaoDoFlutter(noPath.saida);
       if (versaoPath == null) {
         r.aviso(
           'Flutter (PATH)',
@@ -278,18 +281,84 @@ Future<Directory?> _verificarFlutter(
   return dir;
 }
 
-String? _versaoDe(String saida) {
-  final inicio = saida.indexOf('{');
-  if (inicio >= 0) {
+// ------------------------------------------------------------------ pubspec.lock
+
+/// Confere se o Dart e o Flutter em uso atendem a seção `sdks:` de cada `pubspec.lock`.
+///
+/// Um `flutter pub get` rodado fora do pin (IDE, `flutter` global) regenera o lock
+/// pedindo um SDK que o pin não tem; o CI só descobre depois do push. Foi o que
+/// originou o EVAPP-75. A regra vive em tool/verificador/regras.dart, com prova
+/// negativa no tool/testar_verificador.dart.
+void _verificarLocks(Directory raiz, Directory? sdkFlutter, _Relatorio r) {
+  final sep = Platform.pathSeparator;
+  final dart = Platform.version.split(' ').first;
+  String? flutter;
+  if (sdkFlutter != null) {
+    final marcador = File(
+      '${sdkFlutter.path}${sep}bin${sep}cache${sep}flutter.version.json',
+    );
     try {
-      final json = jsonDecode(saida.substring(inicio)) as Map<String, dynamic>;
-      final v = json['frameworkVersion'] as String?;
-      if (v != null) return v;
-    } on FormatException {
-      // cai no regex abaixo
+      final json =
+          jsonDecode(marcador.readAsStringSync()) as Map<String, dynamic>;
+      flutter = json['frameworkVersion'] as String?;
+    } on Object {
+      // sem Flutter legível: confere só o Dart
     }
   }
-  return RegExp(r'Flutter (\S+)').firstMatch(saida)?.group(1);
+
+  final locks = _locksDoRepo(raiz);
+  if (locks.isEmpty) {
+    r.info('pubspec.lock', 'nenhum encontrado (rode `fvm flutter pub get`).');
+    return;
+  }
+  for (final lock in locks) {
+    final rotulo = lock.path
+        .substring(raiz.path.length + 1)
+        .replaceAll(sep, '/');
+    final sdks = sdksDoLock(lock.readAsStringSync());
+    final problemas = <String>[
+      if (sdks['dart'] != null)
+        ?violacaoDeRestricao(dart, sdks['dart']!)?.let((m) => 'Dart $m'),
+      if (sdks['flutter'] != null && flutter != null)
+        ?violacaoDeRestricao(flutter, sdks['flutter']!)?.let((m) => 'Flutter $m'),
+    ];
+    if (problemas.isEmpty) {
+      final comFlutter = sdks['flutter'] != null && flutter != null;
+      r.ok(rotulo, 'sdks atendidos (Dart $dart${comFlutter ? ", Flutter $flutter" : ""})');
+    } else {
+      r.falha(
+        rotulo,
+        '${problemas.join('; ')}. O lock foi gerado por outra versão do Flutter: '
+            'rode `fvm flutter pub get` (ou `fvm dart pub get`) nessa pasta.',
+      );
+    }
+  }
+}
+
+/// `pubspec.lock` ao lado de cada `pubspec.yaml` do repo, fora de pastas geradas.
+List<File> _locksDoRepo(Directory raiz) {
+  const ignorar = {'build', 'node_modules', '.dart_tool', '.git', '.fvm', '.idea'};
+  final sep = Platform.pathSeparator;
+  final achados = <File>[];
+  void varrer(Directory d, int profundidade) {
+    if (profundidade > 4) return;
+    final lock = File('${d.path}${sep}pubspec.lock');
+    if (File('${d.path}${sep}pubspec.yaml').existsSync() && lock.existsSync()) {
+      achados.add(lock);
+    }
+    for (final filho in d.listSync(followLinks: false).whereType<Directory>()) {
+      final nome = filho.path.split(sep).last;
+      if (!ignorar.contains(nome)) varrer(filho, profundidade + 1);
+    }
+  }
+
+  varrer(raiz, 0);
+  achados.sort((a, b) => a.path.compareTo(b.path));
+  return achados;
+}
+
+extension<T extends Object> on T {
+  R let<R>(R Function(T) f) => f(this);
 }
 
 // ---------------------------------------------------------------------------- JDK

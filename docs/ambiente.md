@@ -2,7 +2,10 @@
 
 Três ambientes, cada um com um papel, no mesmo modelo do Desmalha. O que vale para os
 três é o **verificador**: ele lê as versões que o repo declara (`.fvmrc`,
-`tool/setup_env.sh`, `build.gradle.kts`) e diz se a máquina bate.
+`tool/setup_env.sh`, `build.gradle.kts`) e diz se a máquina bate. Desde o EVAPP-75 ele
+também reprova `pubspec.lock` gerado por outra versão do Flutter (a seção `sdks:` pede um
+Dart ou Flutter que o pin não tem). As regras ficam em `tool/verificador/regras.dart`, e a
+prova negativa delas em `tool/testar_verificador.dart`, que o CI roda antes do verificador.
 
 | Ambiente | Para quê | Como se monta |
 |---|---|---|

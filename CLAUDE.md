@@ -41,6 +41,8 @@ packages/sincrovolt_core/    # Dart puro: parser ELM327/PIDs, motor de custos, r
 tool/setup_env.sh            # bootstrap idempotente Linux (nuvem e CI), versões fixadas
 tool/setup_nuvem.sh          # setup script do ambiente de nuvem (≤ 100 linhas; mesmas versões)
 tool/verificar_ambiente.dart # verifica se o ambiente bate com o que o repo declara
+tool/verificador/regras.dart # regras puras do verificador (versão do Flutter, sdks dos pubspec.lock)
+tool/testar_verificador.dart # prova negativa das regras do verificador (roda no CI)
 tool/varrer_segredos.sh      # varredura de segredos (CI e antes de todo PR)
 dados/fixtures/              # logs reais anonimizados (sem GPS, VIN mascarado)
 docs/                        # glossário, convenções, ambiente
