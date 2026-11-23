@@ -18,7 +18,10 @@ prova negativa delas em `tool/testar_verificador.dart`, que o CI roda antes do v
 > por card registrado no board. A troca carrega junto o toolchain Android do app
 > (`android/settings.gradle.kts` e `gradle-wrapper.properties`): o plugin Gradle do
 > Flutter 3.50.1 **reprova** o build abaixo de Gradle 9.3.1, AGP 9.1.1 e KGP 2.4.10 — o
-> projeto usa os valores do template (Gradle 9.5.0, AGP 9.3.1, KGP 2.4.20).
+> projeto usa Gradle 9.5.0, KGP 2.4.20 e **AGP 9.3.3** (o template traz 9.3.1, que quebra o
+> build **release** no `lintVitalAnalyzeRelease` ao ler o JavaDoc de plugins Java; achado
+> no Entrelares, T-60). Confira mudança de AGP com `fvm flutter build apk --release`, não
+> só com o debug, que não roda esse lint.
 >
 > **Material vem do pacote `material_ui`**, não de `package:flutter/material.dart`
 > (deprecado desde o 3.47; com `--fatal-infos` o analyze reprova). Mesmo caso do
