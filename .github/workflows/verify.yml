@@ -35,6 +35,11 @@ jobs:
       - name: Bootstrap (tool/setup_env.sh, sem Android)
         run: bash tool/setup_env.sh
 
+      - name: Verificador — prova negativa das regras
+        run: |
+          source tool/env
+          fvm dart run tool/testar_verificador.dart
+
       - name: Verificador de ambiente
         run: |
           source tool/env

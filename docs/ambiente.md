@@ -2,7 +2,10 @@
 
 Três ambientes, cada um com um papel, no mesmo modelo do Desmalha. O que vale para os
 três é o **verificador**: ele lê as versões que o repo declara (`.fvmrc`,
-`tool/setup_env.sh`, `build.gradle.kts`) e diz se a máquina bate.
+`tool/setup_env.sh`, `build.gradle.kts`) e diz se a máquina bate. Desde o EVAPP-75 ele
+também reprova `pubspec.lock` gerado por outra versão do Flutter (a seção `sdks:` pede um
+Dart ou Flutter que o pin não tem). As regras ficam em `tool/verificador/regras.dart`, e a
+prova negativa delas em `tool/testar_verificador.dart`, que o CI roda antes do verificador.
 
 | Ambiente | Para quê | Como se monta |
 |---|---|---|
@@ -15,7 +18,10 @@ três é o **verificador**: ele lê as versões que o repo declara (`.fvmrc`,
 > por card registrado no board. A troca carrega junto o toolchain Android do app
 > (`android/settings.gradle.kts` e `gradle-wrapper.properties`): o plugin Gradle do
 > Flutter 3.50.1 **reprova** o build abaixo de Gradle 9.3.1, AGP 9.1.1 e KGP 2.4.10 — o
-> projeto usa os valores do template (Gradle 9.5.0, AGP 9.3.1, KGP 2.4.20).
+> projeto usa Gradle 9.5.0, KGP 2.4.20 e **AGP 9.3.3** (o template traz 9.3.1, que quebra o
+> build **release** no `lintVitalAnalyzeRelease` ao ler o JavaDoc de plugins Java; achado
+> no Entrelares, T-60). Confira mudança de AGP com `fvm flutter build apk --release`, não
+> só com o debug, que não roda esse lint.
 >
 > **Material vem do pacote `material_ui`**, não de `package:flutter/material.dart`
 > (deprecado desde o 3.47; com `--fatal-infos` o analyze reprova). Mesmo caso do
