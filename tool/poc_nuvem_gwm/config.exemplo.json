@@ -1,0 +1,9 @@
+{
+  "_comentario": "COPIE para %USERPROFILE%\\.sincrovolt\\gwm\\config.json (FORA do repo). Não commite valores reais.",
+  "email": "seu-email-da-conta-my-gwm",
+  "vin": "opcional; se vazio, usa o primeiro veículo da conta",
+  "signAppId": "appKey de haval-h6-mqtt/signing.js (ver README, seção Certificado e assinatura)",
+  "signHash": "appSecret de haval-h6-mqtt/signing.js (ver README, seção Certificado e assinatura)",
+  "countryCode": "55",
+  "pollGapSeconds": 30
+}
