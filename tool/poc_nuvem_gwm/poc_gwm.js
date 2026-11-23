@@ -113,17 +113,38 @@ function deviceId(dir) {
   return novo;
 }
 
+// Pergunta na linha de comando. Com oculto=true e um terminal de verdade (TTY),
+// lê em raw mode sem ecoar a senha. O prompt é sempre escrito com um write
+// direto ANTES de qualquer coisa, então ele sempre aparece. Sem TTY (entrada
+// redirecionada), cai no readline normal — mostra o prompt e lê a linha.
 function perguntar(texto, oculto = false) {
+  const stdin = process.stdin;
+  if (oculto && stdin.isTTY && typeof stdin.setRawMode === 'function') {
+    return new Promise((resolve) => {
+      process.stdout.write(texto);
+      let buf = '';
+      stdin.resume();
+      stdin.setRawMode(true);
+      const onData = (d) => {
+        for (const ch of d.toString('utf8')) {
+          if (ch === '\r' || ch === '\n') {
+            stdin.setRawMode(false); stdin.pause(); stdin.removeListener('data', onData);
+            process.stdout.write('\n'); resolve(buf.trim()); return;
+          } else if (ch === '\u0003') { // Ctrl+C
+            stdin.setRawMode(false); process.stdout.write('\n'); process.exit(1);
+          } else if (ch === '\u007f' || ch === '\b') {
+            buf = buf.slice(0, -1);
+          } else if (ch >= ' ') {
+            buf += ch;
+          }
+        }
+      };
+      stdin.on('data', onData);
+    });
+  }
   return new Promise((resolve) => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    if (oculto) {
-      const out = rl.output;
-      out.write(texto);
-      rl._writeToOutput = () => {}; // silencia o eco
-      rl.question('', (ans) => { out.write('\n'); rl.close(); resolve(ans.trim()); });
-    } else {
-      rl.question(texto, (ans) => { rl.close(); resolve(ans.trim()); });
-    }
+    const rl = readline.createInterface({ input: stdin, output: process.stdout });
+    rl.question(texto, (ans) => { rl.close(); resolve(ans.trim()); });
   });
 }
 
@@ -410,4 +431,4 @@ if (require.main === module) {
 }
 
 // Exporta as funções puras para teste offline (sem rede).
-module.exports = { mascararVin, assinar, montarRelatorio, linhasStatus, GPS_RE };
+module.exports = { mascararVin, assinar, montarRelatorio, linhasStatus, GPS_RE, perguntar };
