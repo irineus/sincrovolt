@@ -10,8 +10,16 @@ três é o **verificador**: ele lê as versões que o repo declara (`.fvmrc`,
 | **Windows** + Galaxy S26 Ultra | UI, hot reload, Bluetooth real com o ELM327 | seção 2 |
 | **CI** (GitHub Actions, `verify`) | portão de merge | `.github/workflows/verify.yml` |
 
-> ⚠️ **A versão do Flutter não muda aqui.** O pin vive no `.fvmrc` (**3.44.7**) e no
-> `tool/setup_env.sh`; só muda por card registrado no board.
+> ⚠️ **A versão do Flutter não muda aqui.** O pin vive no `.fvmrc` (**3.50.1**, Dart 3.14.0,
+> desde o EVAPP-75; antes 3.44.7) e no `tool/setup_env.sh`/`tool/setup_nuvem.sh`; só muda
+> por card registrado no board. A troca carrega junto o toolchain Android do app
+> (`android/settings.gradle.kts` e `gradle-wrapper.properties`): o plugin Gradle do
+> Flutter 3.50.1 **reprova** o build abaixo de Gradle 9.3.1, AGP 9.1.1 e KGP 2.4.10 — o
+> projeto usa os valores do template (Gradle 9.5.0, AGP 9.3.1, KGP 2.4.20).
+>
+> **Material vem do pacote `material_ui`**, não de `package:flutter/material.dart`
+> (deprecado desde o 3.47; com `--fatal-infos` o analyze reprova). Mesmo caso do
+> `cupertino_ui`.
 
 ---
 
@@ -82,6 +90,9 @@ daquele repo); se a máquina já roda o Desmalha, ela já roda o SincroVolt.
 fvm install
 fvm dart run tool/verificar_ambiente.dart
 ```
+Sempre `fvm flutter`/`fvm dart`, nunca o `flutter` do PATH: um `flutter pub get` fora do
+pin regenera o `pubspec.lock` para outra versão do Dart e o CI reprova (foi o que originou
+o EVAPP-75). Na IDE, aponte o SDK para `~/fvm/versions/<versão do .fvmrc>`.
 Saída esperada no fim: `Ambiente OK — 0 aviso(s).` (avisos sobre o `flutter` do PATH
 são aceitáveis se você sempre usa `fvm flutter`).
 

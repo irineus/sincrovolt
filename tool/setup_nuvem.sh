@@ -5,8 +5,8 @@
 # script não lê as variáveis do ambiente) e sem pub get (roda fora do repo).
 # Dentro do repo continua valendo: bash tool/setup_env.sh && source tool/env
 set -euo pipefail
-FLUTTER_VERSION="3.44.7"   # tem de bater com o .fvmrc e com tool/setup_env.sh
-FLUTTER_SHA256="a0edd646c159c0e816788c0e46a4f071199c1320495898f5a679599b583a05a4"
+FLUTTER_VERSION="3.50.1"   # tem de bater com o .fvmrc e com tool/setup_env.sh
+FLUTTER_SHA256="4ad17fc8462fbcef2ba19ff4a78c0a16b7147fde1add8578e267ea62cdb92678"
 FVM_VERSION="4.1.2"
 export FLUTTER_SUPPRESS_ANALYTICS=true
 FVM_CACHE="${FVM_CACHE_PATH:-$HOME/fvm}"
