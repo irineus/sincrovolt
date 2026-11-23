@@ -22,7 +22,7 @@ públicas), usa a melhor fonte disponível e calcula custo, consumo e saúde da 
 |---|---|---|
 | Nome do produto | **SincroVolt** (supera "Rodovolt" e "Voltis"; renomeação no EVAPP-74) | EVAPP-20 |
 | `applicationId` / bundle id | **`com.sincrovolt.app`** | EVAPP-20 |
-| App mobile | **Flutter 3.44.7 (stable)**, pinado por **FVM** (`.fvmrc` na raiz) | EVAPP-24 |
+| App mobile | **Flutter 3.50.1 (stable, Dart 3.14.0)**, pinado por **FVM** (`.fvmrc` na raiz); Material por `package:material_ui` | EVAPP-24, EVAPP-75 |
 | Bluetooth Clássico (SPP) | canal de plataforma **próprio em Kotlin** atrás de interface Dart | EVAPP-24 |
 | BLE | `universal_ble` (BSD-3) | EVAPP-24 |
 | Núcleo | **Dart puro** (`packages/sincrovolt_core`): ELM327/PIDs, custos, regras | EVAPP-24 |

@@ -2,7 +2,7 @@
 # tool/setup_env.sh — bootstrap idempotente do ambiente Linux do SincroVolt (nuvem e CI).
 #
 # Adaptado do bootstrap do Desmalha. Instala/garante, com versões FIXADAS:
-#   - Flutter 3.44.7 (tarball oficial de storage.googleapis.com, sha256 conferido),
+#   - Flutter 3.50.1 (tarball oficial de storage.googleapis.com, sha256 conferido),
 #     que embute o Dart;
 #   - FVM 4.1.2 (pub.dev), apontando para esse Flutter;
 #   - opcional (SINCROVOLT_COM_ANDROID=1): JDK 17 (apt) e Android SDK (dl.google.com).
@@ -21,12 +21,12 @@
 set -euo pipefail
 
 # ---------------------------------------------------------------- constantes
-FLUTTER_VERSION="3.44.7"   # tem de bater com o .fvmrc (o verificador confere)
-FLUTTER_SHA256="a0edd646c159c0e816788c0e46a4f071199c1320495898f5a679599b583a05a4"
+FLUTTER_VERSION="3.50.1"   # tem de bater com o .fvmrc (o verificador confere)
+FLUTTER_SHA256="4ad17fc8462fbcef2ba19ff4a78c0a16b7147fde1add8578e267ea62cdb92678"
 FVM_VERSION="4.1.2"
-ANDROID_PLATFORM="android-36"      # compileSdk padrão do Flutter 3.44.7
+ANDROID_PLATFORM="android-36"      # compileSdk padrão do Flutter 3.50.1
 BUILD_TOOLS="36.0.0"
-NDK_VERSION="28.2.13676358"        # ndkVersion padrão do Flutter 3.44.7
+NDK_VERSION="28.2.13676358"        # ndkVersion padrão do Flutter 3.50.1
 CMDLINE_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
 
 # Sem telemetria do Flutter/Dart: medido no EVAPP-36, o primeiro `flutter` tentava
