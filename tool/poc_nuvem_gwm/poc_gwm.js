@@ -71,6 +71,13 @@ function mascararVin(v) {
   return s.slice(0, 3) + '*'.repeat(s.length - 3);
 }
 
+// Mascara QUALQUER VIN (17 caracteres no padrão, sem I/O/Q) embutido num texto —
+// a nuvem devolve o VIN inteiro dentro de campos como deviceId e id
+// (ex.: "LGW...231255_0_STATUS"). Sem isso o VIN vazaria no relatório (regra 3).
+function mascararVinsEmTexto(s) {
+  return String(s).replace(/[A-HJ-NPR-Z0-9]{17}/gi, (m) => mascararVin(m));
+}
+
 function pastaConfig() {
   return process.env.SINCROVOLT_GWM_DIR || path.join(os.homedir(), '.sincrovolt', 'gwm');
 }
@@ -290,7 +297,7 @@ function linhasStatus(data) {
     const def = SINAIS[String(it.code)];
     const nome = def ? def.nome : `(código ${it.code})`;
     const unid = def ? def.unid : '';
-    let valor = GPS_RE.test(nome) ? '[ocultado — GPS]' : it.value;
+    let valor = GPS_RE.test(nome) ? '[ocultado — GPS]' : mascararVinsEmTexto(it.value);
     linhas.push({ code: it.code, nome, valor, unid });
   }
   return linhas;
@@ -301,7 +308,7 @@ function topoNaoItens(data) {
   for (const [k, v] of Object.entries(data || {})) {
     if (k === 'items') continue;
     if (GPS_RE.test(k)) { extras.push([k, '[ocultado — GPS]']); continue; }
-    extras.push([k, typeof v === 'object' ? JSON.stringify(v) : String(v)]);
+    extras.push([k, mascararVinsEmTexto(typeof v === 'object' ? JSON.stringify(v) : String(v))]);
   }
   return extras;
 }

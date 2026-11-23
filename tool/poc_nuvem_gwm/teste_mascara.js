@@ -32,13 +32,16 @@ const s1 = {
     ],
     latitude: latReal, longitude: lonReal,        // GPS no topo
     updateTime: String(Date.now() - 42000),       // timestamp do carro
+    deviceId: VIN,                                 // VIN inteiro num campo de topo
+    id: VIN + '_0_STATUS',                         // VIN embutido num id composto
   },
 };
 const s2 = { pedidoEm: Date.now(), data: { items: [{ code: '2013021', value: '86' }] } };
 const rel = montarRelatorio({ pollGapSeconds: 30 }, VIN, [{ vin: VIN }], s1, s2, { lista: [] });
 
-ok(!rel.includes(VIN), 'VIN inteiro NÃO aparece no relatório');
+ok(!rel.includes(VIN), 'VIN inteiro NÃO aparece no relatório (nem em deviceId/id)');
 ok(rel.includes(mascararVin(VIN)), 'VIN mascarado aparece no relatório');
+ok(rel.includes(mascararVin(VIN) + '_0_STATUS'), 'VIN embutido em id composto fica mascarado, resto preservado');
 ok(!rel.includes(latReal) && !rel.includes(lonReal), 'coordenadas GPS NÃO aparecem no relatório');
 ok(rel.includes('[ocultado — GPS]'), 'GPS marcado como ocultado');
 ok(rel.includes('cru-xyz'), 'código desconhecido sai cru (descoberta)');
