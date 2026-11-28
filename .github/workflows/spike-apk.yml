@@ -1,0 +1,59 @@
+# Spike EVAPP-11: APK debug do app de leitura OBD-II (spikes/obd_spp), entregue como
+# artifact para instalar à mão no Galaxy. Sem keystore, sem segredo, sem release:
+# cada build usa a chave debug do runner (para atualizar, desinstale o "spike OBD").
+name: spike-apk
+
+on:
+  push:
+    branches: ['evapp-11-*']
+    paths: ['spikes/obd_spp/**', '.github/workflows/spike-apk.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spike-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache do Flutter, pub, Android SDK e Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/fvm
+            ~/.pub-cache
+            ~/android-sdk
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: spike-apk-${{ runner.os }}-${{ hashFiles('tool/setup_env.sh', '.fvmrc', 'spikes/obd_spp/android/**/*.kts', 'spikes/obd_spp/android/gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Bootstrap com Android (tool/setup_env.sh)
+        run: SINCROVOLT_COM_ANDROID=1 bash tool/setup_env.sh
+
+      - name: Spike — analyze e testes
+        working-directory: spikes/obd_spp
+        run: |
+          source ../../tool/env
+          fvm flutter pub get
+          fvm flutter analyze --fatal-infos
+          fvm flutter test
+
+      - name: Spike — APK debug
+        working-directory: spikes/obd_spp
+        run: |
+          source ../../tool/env
+          fvm flutter build apk --debug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spike-obd-apk
+          path: spikes/obd_spp/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 14
+          if-no-files-found: error
